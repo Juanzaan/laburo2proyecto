@@ -27,3 +27,37 @@ void loop() {
 
   delay(500);
 }
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Otro codigo para lo mismo:
+// C++ code
+//
+int btn;
+void setup()
+
+{
+pinMode(2,OUTPUT);
+pinMode(7,OUTPUT);  
+pinMode(6,INPUT);   
+}
+
+void loop()
+{
+  
+  btn=distanciaCM();
+  if(btn<20){
+  digitalWrite(2,HIGH);
+  
+  }
+}
+
+int distanciaCM(){
+  digitalWrite(7, HIGH); // enciende el pin del sensor
+  delayMicroseconds(10);  // espera 10 microsegundos
+  digitalWrite(7, LOW); // apaga el sensor
+ long tiempo = pulseIn(6,HIGH); // cuenta el tiempo
+ int distancia = tiempo*0.0343/2; // calcula  la distancia segun la velocidad del sonido
+ return distancia;
+ }
