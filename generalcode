@@ -1,0 +1,78 @@
+
+// Declaramos un arreglo con los pines donde están conectados los LEDs
+int leds[] = {4, 5, 8, 9};  
+int btn; // Variable que almacena la distancia medida por el sensor ultrasónico
+
+void setup() {
+  // Configura los pines de los LEDs como salidas y los apaga inicialmente
+  for (int i = 0; i < 4; i++) {
+    pinMode(leds[i], OUTPUT);
+    digitalWrite(leds[i], LOW);
+  }
+
+  // Configura los pines de los motores como salidas
+  pinMode(2, OUTPUT);   // Motor A
+  pinMode(11, OUTPUT);  // Motor B
+  digitalWrite(2, LOW);  // Apaga motor A al inicio
+  digitalWrite(11, LOW); // Apaga motor B al inicio
+
+  // Configura los pines del sensor ultrasónico
+  pinMode(7, OUTPUT);  // TRIG (disparo)
+  pinMode(6, INPUT);   // ECHO (recepción)
+}
+
+void loop() {
+  // Obtiene la distancia medida en centímetros
+  btn = distanciaCM();
+
+  // Apaga todos los LEDs antes de evaluar las condiciones
+  for (int i = 0; i < 4; i++) {
+    digitalWrite(leds[i], LOW);
+  }
+
+  // Nueva condición: si la distancia es menor a 15 cm → apaga ambos motores
+  if (btn < 15) {
+    digitalWrite(2, LOW);         // Apaga motor A
+    digitalWrite(11, LOW);        // Apaga motor B
+    // Sin LED encendido para esta condición
+  }
+
+  // Condición 1: distancia entre 15 y 30 cm
+  else if (btn > 15 && btn < 30) {
+    digitalWrite(leds[0], HIGH);  // Enciende LED conectado al pin 4
+    digitalWrite(2, HIGH);        // Enciende motor A
+    digitalWrite(11, LOW);        // Apaga motor B
+  }
+
+  // Condición 2: distancia entre 30 y 45 cm
+  else if (btn > 30 && btn < 45) {
+    digitalWrite(leds[1], HIGH);  // Enciende LED conectado al pin 5
+    digitalWrite(2, LOW);         // Apaga motor A
+    digitalWrite(11, HIGH);       // Enciende motor B
+  }
+
+  // Condición 3: distancia entre 45 y 60 cm
+  else if (btn > 45 && btn < 60) {
+    digitalWrite(leds[2], HIGH);  // Enciende LED conectado al pin 8
+    digitalWrite(2, HIGH);        // Enciende motor A
+    digitalWrite(11, HIGH);       // Enciende motor B
+  }
+
+  // Condición 4: distancia entre 60 y 75 cm
+  else if (btn > 60 && btn < 75) {
+    digitalWrite(leds[3], HIGH);  // Enciende LED conectado al pin 9
+    digitalWrite(2, LOW);         // Apaga motor A
+    digitalWrite(11, LOW);        // Apaga motor B
+  }
+}
+
+// Función que mide la distancia en centímetros usando el sensor ultrasónico
+int distanciaCM() {
+  digitalWrite(7, HIGH);           // Envía un pulso de 10 microsegundos
+  delayMicroseconds(10);          
+  digitalWrite(7, LOW);            // Termina el pulso
+
+  long tiempo = pulseIn(6, HIGH);  // Mide el tiempo que tarda en regresar el eco
+  int distancia = tiempo * 0.0343 / 2; // Calcula la distancia en cm
+  return distancia;
+}
