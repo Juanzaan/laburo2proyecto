@@ -1,0 +1,99 @@
+Codigo que contiene el funcionamiento de motores, sensor ultrasonico, puente h, leds (funcionan pero no exactamente como queremos)
+
+// Declaramos un arreglo con los pines donde están conectados los LEDs
+int leds[] = {8, 9, 10, 11};  
+int btn; // Variable que almacena la distancia medida por el sensor ultrasónico
+
+void setup() {
+  // Configura los pines de los LEDs como salidas y los apaga inicialmente
+  Serial.begin(9600);
+  for (int i = 0; i < 4; i++) {
+    pinMode(leds[i], OUTPUT);
+    digitalWrite(leds[i], LOW);
+  }
+
+  // Pines de control digital de los motores
+  pinMode(2, OUTPUT);   // Motor A dirección
+  pinMode(4, OUTPUT);   // Motor B dirección
+  digitalWrite(2, LOW);
+  digitalWrite(4, LOW);
+
+  // Pines PWM para velocidad de los motores
+  pinMode(3, OUTPUT);   // Motor A velocidad (PWM)
+  pinMode(5, OUTPUT);   // Motor B velocidad (PWM)
+  analogWrite(3, 0);     // Arranca detenido
+  analogWrite(5, 0);
+
+  // Configura los pines del sensor ultrasónico
+  pinMode(7, OUTPUT);  // TRIG (disparo)
+  pinMode(6, INPUT);   // ECHO (recepción)
+}
+
+void loop() {
+  // Obtiene la distancia medida en centímetros
+  btn = distanciaCM();
+
+
+
+  // Condición 0: distancia menor a 15 cm → todo detenido
+  if (btn < 15 || btn > 75) {
+    digitalWrite(2, LOW);        // Motor A dirección detenida
+    analogWrite(3, 0);           // Motor A velocidad 0
+    digitalWrite(4, LOW);        // Motor B dirección detenida
+    analogWrite(5, 0);           // Motor B velocidad 0
+    Serial.println("Menos de 15 y mas de 75");
+    for (int i = 0; i < 4; i++) {
+    
+    digitalWrite(leds[i], LOW);
+  }
+
+  }
+  // Condición 1: distancia entre 15 y 30 cm
+  else if (btn >= 15 && btn < 30) {
+    digitalWrite(leds[0], HIGH); // LED 1
+    digitalWrite(2, HIGH);       // Motor A gira
+    analogWrite(3, 70);         // Motor A velocidad máxima
+    digitalWrite(4, LOW);        // Motor B detenido
+    analogWrite(5, 0);           // Motor B velocidad 0
+    Serial.println("15 a 30");
+
+  }
+  // Condición 2: distancia entre 30 y 45 cm
+  else if (btn >= 30 && btn < 45) {
+    digitalWrite(leds[1], HIGH); // LED 2
+    digitalWrite(2, LOW);        // Motor A detenido
+    analogWrite(3, 0);           // Motor A velocidad 0
+    digitalWrite(4, HIGH);       // Motor B gira
+    analogWrite(5, 70);         // Motor B velocidad máxima
+    Serial.println("30 a 45");
+  }
+  // Condición 3: distancia entre 45 y 60 cm
+  else if (btn >= 45 && btn < 60) {
+    digitalWrite(leds[2], HIGH); // LED 3
+    digitalWrite(2, HIGH);       // Motor A gira
+    analogWrite(3, 70);         // Motor A velocidad máxima
+    digitalWrite(4, HIGH);       // Motor B gira
+    analogWrite(5, 70);         // Motor B velocidad máxima
+    Serial.println("45 a 60");
+  }
+  // Condición 4: distancia entre 60 y 75 cm
+  else if (btn >= 60 && btn < 75) {
+    digitalWrite(leds[3], HIGH); // LED 4
+    digitalWrite(2, LOW);        // Motor A detenido
+    analogWrite(3, 0);           // Motor A velocidad 0
+    digitalWrite(4, LOW);        // Motor B detenido
+    analogWrite(5, 0);           // Motor B velocidad 0
+    Serial.println("60 a 75");
+  }
+}
+
+// Función que mide la distancia en centímetros usando el sensor ultrasónico
+int distanciaCM() {
+  digitalWrite(7, HIGH);           // Envía pulso
+  delayMicroseconds(10);
+  digitalWrite(7, LOW);
+
+  long tiempo = pulseIn(6, HIGH);  // Tiempo de eco
+  int distancia = tiempo * 0.0343 / 2; // cm
+  return distancia;
+}
