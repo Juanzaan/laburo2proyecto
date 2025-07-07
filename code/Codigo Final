@@ -1,0 +1,83 @@
+// Declaramos un arreglo con los pines donde están conectados los LEDs
+int leds[] = {10, 11, 8, 9};  
+int btn; // Variable que almacena la distancia medida por el sensor ultrasónico
+
+void setup() {
+  Serial.begin(9600);
+  // Configura los pines de los LEDs como salidas y los apaga inicialmente
+  for (int i = 0; i < 4; i++) {
+    pinMode(leds[i], OUTPUT);
+    digitalWrite(leds[i], LOW);
+  }
+  // Pines de control digital de los motores
+  pinMode(2, OUTPUT);   // Motor A dirección
+  pinMode(4, OUTPUT);   // Motor B dirección
+  digitalWrite(2, LOW);
+  digitalWrite(4, LOW);
+  // Pines PWM para velocidad de los motores
+  pinMode(3, OUTPUT);   // Motor A velocidad (PWM)
+  pinMode(5, OUTPUT);   // Motor B velocidad (PWM)
+  analogWrite(3, 0);     // Arranca detenido
+  analogWrite(5, 0);
+  // Configura los pines del sensor ultrasónico
+  pinMode(7, OUTPUT);  // TRIG (disparo)
+  pinMode(6, INPUT);   // ECHO (recepción)
+}
+
+// Función auxiliar para encender sólo un LED (o apagar todos pasándole -1)
+void setLED(int idx) {
+  for (int i = 0; i < 4; i++) {
+    digitalWrite(leds[i], (i == idx) ? HIGH : LOW);
+  }
+}
+
+void loop() {
+  btn = distanciaCM();
+  Serial.println(btn);
+  
+
+  // Condición 0: distancia <15 o >75 → todo detenido, todos los LEDs apagados
+  if (btn < 2 && btn > 32) {
+    setLED(-1);
+    digitalWrite(2, LOW);  analogWrite(3, 0);
+    digitalWrite(4, LOW);  analogWrite(5, 0);
+    Serial.println("Menos de 2 ó más de 32");
+  }
+  // Condición 1: 15 ≤ distancia < 30
+  else if (btn >2 && btn < 8  ) {
+    setLED(0);               // sólo LED[0]
+    digitalWrite(2, HIGH);   analogWrite(3, 40);
+    digitalWrite(4, LOW);    analogWrite(5, 0);
+    Serial.println("2 a 8");
+  }
+  // Condición 2: 30 ≤ distancia < 45
+  else if (btn > 10 && btn < 16) {
+    setLED(1);
+    digitalWrite(2, LOW);    analogWrite(3, 0);
+    digitalWrite(4, HIGH);   analogWrite(5, 70);
+    Serial.println("10 a 16");
+  }
+  // Condición 3: 45 ≤ distancia < 60
+  else if (btn > 18 && btn < 24) {
+    setLED(2);
+    digitalWrite(2, HIGH);   analogWrite(3, 70);
+    digitalWrite(4, HIGH);   analogWrite(5, 70);
+    Serial.println("18 a 24");
+  }
+  // Condición 4: 60 ≤ distancia ≤ 75
+  else {
+    setLED(3);
+    digitalWrite(2, LOW);    analogWrite(3, 0);
+    digitalWrite(4, LOW);    analogWrite(5, 0);
+    Serial.println("26 a 32");
+  }
+}
+
+// Función que mide la distancia en centímetros usando el sensor ultrasónico
+int distanciaCM() {
+  digitalWrite(7, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(7, LOW);
+  long tiempo = pulseIn(6, HIGH);
+  return tiempo * 0.0343 / 2;
+}
